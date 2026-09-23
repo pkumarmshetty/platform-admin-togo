@@ -23,6 +23,30 @@ export const authOptions: NextAuthOptions = {
 
   
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const allowedOrigins = [baseUrl]
+
+      if (process.env.NEXT_PUBLIC_CREDEBL_UI_PATH) {
+        try {
+          allowedOrigins.push(new URL(process.env.NEXT_PUBLIC_CREDEBL_UI_PATH).origin)
+        } catch {
+        }
+      }
+
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+
+      try {
+        const callbackUrl = new URL(url)
+        if (allowedOrigins.includes(callbackUrl.origin)) {
+          return url
+        }
+      } catch {
+      }
+
+      return baseUrl
+    },
     async jwt({ token, user }) {
       if (user) {
        
